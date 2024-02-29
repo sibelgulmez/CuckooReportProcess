@@ -7,7 +7,6 @@ class writer:
     """
     A class to write the data into a csv file
     """
-
     def __init__(self, ransomware_dataset, benign_dataset):
         """
         :param ransomware_dataset: Dataset object of ransomware samples
@@ -26,14 +25,15 @@ class writer:
         self.strings = []
         self.drops = []
         self.drop_exts = []
+        self.drop_types = []
         self.regs = []
         self.files = []
         self.file_exts = []
         self.signatures = []
+        self.signature_references = []
 
         self.fill_header()
         self.fill_content()
-
     def fill_header(self):
         """
         A function to fill the header of the csv file and also the empty lists of the class
@@ -62,11 +62,17 @@ class writer:
             self.header.append("DROP:" + drop)
 
         # drop extentions
-        self.drop_exts = self.ransomware_dataset.unique_drop_exts + self.benign_dataset.unique_drops
+        self.drop_exts = self.ransomware_dataset.unique_drop_exts + self.benign_dataset.unique_drop_exts
         self.drop_exts = sorted(list(set(self.drop_exts)))
         for drop_ext in self.drop_exts:
             self.header.append("DROP_EXT:" + drop_ext)
 
+
+        # drop types
+        self.drop_types = self.ransomware_dataset.unique_drop_types + self.benign_dataset.unique_drop_types
+        self.drop_types = sorted(list(set(self.drop_types)))
+        for drop_type in self.drop_types:
+            self.header.append("DROP_TYPE:" + drop_type)
 
         # regs
         self.regs = self.ransomware_dataset.unique_regs + self.benign_dataset.unique_regs
@@ -99,6 +105,11 @@ class writer:
         for string in self.strings:
             self.header.append("STRING:" + string)
 
+        # mutexes
+        self.mutexes = self.ransomware_dataset.unique_mutexes + self.benign_dataset.unique_mutexes
+        self.mutexes = sorted(list(set(self.mutexes)))
+        for mutex in self.mutexes:
+            self.header.append("MUTEX:" + mutex)
 
         # signatures
         self.signatures = self.ransomware_dataset.unique_signatures + self.benign_dataset.unique_signatures
@@ -106,6 +117,11 @@ class writer:
         for signature in self.signatures:
             self.header.append("SIGNATURE:" + signature)
 
+        # signature references
+        self.signature_references = self.ransomware_dataset.unique_signature_references + self.benign_dataset.unique_signature_references
+        self.signature_references = sorted(list(set(self.signature_references)))
+        for signature_reference in self.signature_references:
+            self.header.append("SIGNATURE_REFERENCE:" + signature_reference)
     def fill_content(self):
         """
         A function to fill the csv content
@@ -130,13 +146,6 @@ class writer:
                 else:
                     ransomware_content.append(0)
 
-            # reg
-            for reg in self.regs:
-                if reg in ransomware_sample.regs:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
-
             # drop
             for drop in self.drops:
                 if drop in ransomware_sample.drops:
@@ -147,6 +156,20 @@ class writer:
             # drop_ext
             for drop_ext in self.drop_exts:
                 if drop_ext in ransomware_sample.drop_exts:
+                    ransomware_content.append(1)
+                else:
+                    ransomware_content.append(0)
+
+            # drop_type
+            for drop_type in self.drop_types:
+                if drop_type in ransomware_sample.drop_types:
+                    ransomware_content.append(1)
+                else:
+                    ransomware_content.append(0)
+
+            # reg
+            for reg in self.regs:
+                if reg in ransomware_sample.regs:
                     ransomware_content.append(1)
                 else:
                     ransomware_content.append(0)
@@ -179,12 +202,29 @@ class writer:
                 else:
                     ransomware_content.append(0)
 
+            # mutex
+            for mutex in self.mutexes:
+                if mutex in ransomware_sample.mutexes:
+                    ransomware_content.append(1)
+                else:
+                    ransomware_content.append(0)
+
+
             # signature
             for signature in self.signatures:
                 if signature in ransomware_sample.signatures:
                     ransomware_content.append(1)
                 else:
                     ransomware_content.append(0)
+
+
+            # signature reference
+            for signature_reference in self.signature_references:
+                if signature_reference in ransomware_sample.signature_references:
+                    ransomware_content.append(1)
+                else:
+                    ransomware_content.append(0)
+
 
             self.content.append(ransomware_content)
 
@@ -207,13 +247,6 @@ class writer:
                 else:
                     benign_content.append(0)
 
-            # reg
-            for reg in self.regs:
-                if reg in benign_sample.regs:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
-
             # drop
             for drop in self.drops:
                 if drop in benign_sample.drops:
@@ -224,6 +257,20 @@ class writer:
             # drop_ext
             for drop_ext in self.drop_exts:
                 if drop_ext in benign_sample.drop_exts:
+                    benign_content.append(1)
+                else:
+                    benign_content.append(0)
+
+            # drop_type
+            for drop_type in self.drop_types:
+                if drop_type in benign_sample.drop_types:
+                    benign_content.append(1)
+                else:
+                    benign_content.append(0)
+
+            # reg
+            for reg in self.regs:
+                if reg in benign_sample.regs:
                     benign_content.append(1)
                 else:
                     benign_content.append(0)
@@ -256,6 +303,14 @@ class writer:
                 else:
                     benign_content.append(0)
 
+            # mutex
+            for mutex in self.mutexes:
+                if mutex in benign_sample.mutexes:
+                    benign_content.append(1)
+                else:
+                    benign_content.append(0)
+
+
             # signature
             for signature in self.signatures:
                 if signature in benign_sample.signatures:
@@ -263,8 +318,15 @@ class writer:
                 else:
                     benign_content.append(0)
 
-            self.content.append(benign_content)
 
+            # signature reference
+            for signature_reference in self.signature_references:
+                if signature_reference in benign_sample.signature_references:
+                    benign_content.append(1)
+                else:
+                    benign_content.append(0)
+
+            self.content.append(benign_content)
     def write(self, directory, filename):
         """
         A function to write .csv and .txt files
@@ -279,6 +341,7 @@ class writer:
                 csv_writer = csv.writer(f)
                 csv_writer.writerow(self.header)
                 csv_writer.writerows(self.content)
+            print(filename, "has been written successfully.")
         except Exception:
             print("Error occured while writing csv file.")
 
@@ -288,6 +351,7 @@ class writer:
             with open(filename, 'w') as f:
                 for line in self.header:
                     f.write(f"{line}\n")
+            print(filename, "has been written successfully.")
         except Exception:
             print("Error occured while writing text file.")
 

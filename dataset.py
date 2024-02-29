@@ -29,8 +29,11 @@ class dataset:
         self.unique_files = []
         self.unique_file_exts = []
         self.unique_signatures = []
+        self.unique_signature_references = []
+        self.unique_drop_types = []
 
         self.create_unique_lists()
+
     def get_analysis_folders(self):
         """
         A function to list all of the analysis folders found in the main cuckoo directory.
@@ -171,6 +174,11 @@ class dataset:
                 self.unique_drop_exts+= drop_exts
                 self.unique_drop_exts = list(set(self.unique_drop_exts))
 
+                # drop_types
+                drop_types = self.get_drop_types(json_file_content)
+                self.unique_drop_types += drop_types
+                self.unique_drop_types = list(set(self.unique_drop_exts))
+
                 # regs
                 regs = self.get_regs(json_file_content)
                 self.unique_regs += regs
@@ -190,6 +198,11 @@ class dataset:
                 signatures = self.get_signatures(json_file_content)
                 self.unique_signatures += signatures
                 self.unique_signatures = list(set(self.unique_signatures))
+
+                # signature_references
+                signature_references = self.get_signature_references(json_file_content)
+                self.unique_signature_references += signature_references
+                self.unique_signature_references = list(set(self.unique_signature_references))
 
             except Exception:
                 e = Exception
@@ -330,6 +343,21 @@ class dataset:
             # print("Exception occured in the file", report_json_path, "while reading mutual exclusions.")
             e = Exception
         return drop_exts
+    def get_drop_types(self, json_file_content):
+        """
+        Returns the list of drop types found in the specified cuckoo report
+        :param json_file_content: content of the cuckoo analysis report file
+        :return: a list of drop types (found in a single report)
+        """
+        drop_types = []
+        try:
+            for dropped in json_file_content["dropped"]:
+                drop_type = dropped["filepath"]
+                drop_types.append(drop_type)
+        except Exception:
+            # print("Exception occured in the file", report_json_path, "while reading mutual exclusions.")
+            e = Exception
+        return drop_types
     def get_regs(self, json_file_content):
         """
         Returns the list of regs found in the specified cuckoo report
@@ -337,41 +365,36 @@ class dataset:
         :return: a list of regs (found in a single report)
         """
         regs = []
+        # regkey_deleted
         try:
-            # regkey_deleted
-            try:
-                for deleted in json_file_content["behavior"]["summary"]["regkey_deleted"]:
-                    reg = "DELETED:" + deleted
-                    regs.append(reg)
-            except Exception:
-                e = Exception
-
-            # regkey_opened
-            try:
-                for opened in json_file_content["behavior"]["summary"]["regkey_opened"]:
-                    reg = "OPENED:" + opened
-                    regs.append(reg)
-            except Exception:
-                e = Exception
-
-            # regkey_read
-            try:
-                for read in json_file_content["behavior"]["summary"]["regkey_read"]:
-                    reg = "READ:" + read
-                    regs.append(reg)
-            except Exception:
-                e = Exception
-
-            # regkey_written
-            try:
-                for written in json_file_content["behavior"]["summary"]["regkey_written"]:
-                    reg = "WRITTEN:" + written
-                    regs.append(reg)
-            except Exception:
-                e = Exception
-
+            for deleted in json_file_content["behavior"]["summary"]["regkey_deleted"]:
+                reg = "DELETED:" + deleted
+                regs.append(reg)
         except Exception:
-            # print("Exception occured in the file", report_json_path, "while reading mutual exclusions.")
+            e = Exception
+
+        # regkey_opened
+        try:
+            for opened in json_file_content["behavior"]["summary"]["regkey_opened"]:
+                reg = "OPENED:" + opened
+                regs.append(reg)
+        except Exception:
+            e = Exception
+
+        # regkey_read
+        try:
+            for read in json_file_content["behavior"]["summary"]["regkey_read"]:
+                reg = "READ:" + read
+                regs.append(reg)
+        except Exception:
+            e = Exception
+
+        # regkey_written
+        try:
+            for written in json_file_content["behavior"]["summary"]["regkey_written"]:
+                reg = "WRITTEN:" + written
+                regs.append(reg)
+        except Exception:
             e = Exception
         return regs
     def get_files(self, json_file_content):
@@ -381,86 +404,16 @@ class dataset:
         :return: a list of files (found in a single report)
         """
         files = []
-        # file_deleted
+
         try:
-            for deleted in json_file_content["behavior"]["summary"]["file_deleted"]:
-                file = "DELETED:" + deleted
-                files.append(file)
+            for key in json_file_content["behavior"]["summary"].keys():
+                if key.startswith("file_"):
+                    operation_type = key.replace("file_").upper() + ":"
+                    for processed_file in json_file_content["behavior"]["summary"][key]:
+                        file = ("\\").join(processed_file.split("\\")[:-1])
+                        files.append(operation_type + file)
         except Exception:
             e = Exception
-
-        # file_opened
-        try:
-            for opened in json_file_content["behavior"]["summary"]["file_opened"]:
-                file = "OPENED:" + "\\".join(opened.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_created
-        try:
-            for created in json_file_content["behavior"]["summary"]["file_created"]:
-                file = "CREATED:" + "\\".join(created.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_recreated
-        try:
-            for recreated in json_file_content["behavior"]["summary"]["file_recreated"]:
-                file = "RECREATED:" + "\\".join(recreated.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_read
-        try:
-            for read in json_file_content["behavior"]["summary"]["file_read"]:
-                file = "READ:" + "\\".join(read.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_written
-        try:
-            for written in json_file_content["behavior"]["summary"]["file_written"]:
-                file = "WRITTEN:" + "\\".join(written.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_exists
-        try:
-            for exists in json_file_content["behavior"]["summary"]["file_exists"]:
-                file = "EXISTS:" + "\\".join(exists.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_failed
-        try:
-            for failed in json_file_content["behavior"]["summary"]["file_failed"]:
-                file = "FAILED:" + "\\".join(failed.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_copied
-        try:
-            for copied in json_file_content["behavior"]["summary"]["file_copied"]:
-                file = "COPIED:" + "\\".join(copied.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
-        # file_moved
-        try:
-            for moved in json_file_content["behavior"]["summary"]["file_moved"]:
-                file = "MOVED:" + "\\".join(moved.split("\\")[:-1])
-                files.append(file)
-        except Exception:
-            e = Exception
-
         return files
     def get_files_ext(self, json_file_content):
         """
@@ -469,96 +422,17 @@ class dataset:
         :return: a list of file extentions (found in a single report)
         """
         file_exts = []
-        # file_deleted
+
         try:
-            for deleted in json_file_content["behavior"]["summary"]["file_deleted"]:
-                file_ext = deleted.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("DELETED:" + file_ext)
+            for key in json_file_content["behavior"]["summary"].keys():
+                if key.startswith("file_"):
+                    operation_type = key.replace("file_").upper() + ":"
+                    for processed_file in json_file_content["behavior"]["summary"][key]:
+                        file_ext = processed_file.split("\\")[-1].split(".")[-1]
+                        if (file_ext.isalnum()):
+                            file_exts.append(operation_type + file_ext)
         except Exception:
             e = Exception
-
-        # file_opened
-        try:
-            for opened in json_file_content["behavior"]["summary"]["file_opened"]:
-                file_ext = opened.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("OPENED:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_created
-        try:
-            for created in json_file_content["behavior"]["summary"]["file_created"]:
-                file_ext = created.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("CREATED:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_recreated
-        try:
-            for recreated in json_file_content["behavior"]["summary"]["file_recreated"]:
-                file_ext = recreated.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("RECREATED:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_read
-        try:
-            for read in json_file_content["behavior"]["summary"]["file_read"]:
-                file_ext = read.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("READ:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_written
-        try:
-            for written in json_file_content["behavior"]["summary"]["file_written"]:
-                file_ext = written.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("WRITTEN:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_exists
-        try:
-            for exists in json_file_content["behavior"]["summary"]["file_exists"]:
-                file_ext = exists.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("EXISTS:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_failed
-        try:
-            for failed in json_file_content["behavior"]["summary"]["file_failed"]:
-                file_ext = failed.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("FAILED:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_copied
-        try:
-            for copied in json_file_content["behavior"]["summary"]["file_copied"]:
-                file_ext = copied.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("COPIED:" + file_ext)
-        except Exception:
-            e = Exception
-
-        # file_moved
-        try:
-            for moved in json_file_content["behavior"]["summary"]["file_moved"]:
-                file_ext = moved.split("\\")[-1].split(".")[-1]
-                if (file_ext.isalnum()):
-                    file_exts.append("MOVED:" + file_ext)
-        except Exception:
-            e = Exception
-
         return file_exts
     def get_signatures(self, json_file_content):
         """
@@ -567,13 +441,36 @@ class dataset:
         :return: a list of signatures (found in a single report)
         """
         signatures = []
-        for signature in json_file_content["signatures"]:
-            try:
-                signatures.append(signature["name"])
-            except Exception:
-                # print("Exception occured in the file", report_json_path, "while reading mutual exclusions.")
-                e = Exception
+        try:
+            for signature in json_file_content["signatures"]:
+                try:
+                    signatures.append(signature["name"])
+                except Exception:
+                    # print("Exception occured in the file", report_json_path, "while reading signatures.")
+                    e = Exception
+        except Exception:
+            # print("Exception occured in the file", report_json_path, "while reading signatures.")
+            e = Exception
         return signatures
+    def get_signature_references(self, json_file_content):
+        """
+        Returns the list of signature references found in the specified cuckoo report
+        :param json_file_content: content of the cuckoo analysis report file
+        :return: a list of signature references (found in a single report)
+        """
+        signature_references = []
+        try:
+            for signature in json_file_content["signatures"]:
+                try:
+                    for reference in signature["references"]:
+                        signature_references.append(reference)
+                except Exception:
+                    # print("Exception occured in the file", report_json_path, "while reading signature references.")
+                    e = Exception
+        except Exception:
+            # print("Exception occured in the file", report_json_path, "while reading signature references.")
+            e = Exception
+        return signature_references
     def sort_lists(self):
         """
         A function to sort unique lists.
@@ -590,4 +487,6 @@ class dataset:
         self.unique_files = sorted(self.unique_files)
         self.unique_file_exts = sorted(self.unique_file_exts)
         self.unique_signatures = sorted(self.unique_signatures)
+        self.unique_signature_references = sorted(self.unique_signature_references)
+        self.unique_drop_types = sorted(self.unique_drop_types)
         return
