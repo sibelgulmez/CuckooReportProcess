@@ -133,6 +133,7 @@ class dataset:
         shutil.rmtree(analysis_folder_path)
         return
     def create_unique_lists(self):
+        print("Generating feature sets...")
         for report_json_path in self.json_paths:
             try:
                 # read file
