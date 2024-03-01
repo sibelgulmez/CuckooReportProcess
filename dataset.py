@@ -55,7 +55,7 @@ class dataset:
             if folder_name.endswith(".json"):
                 folder_list.append(os.path.join(self.cuckoo_directory, folder_name))
         print("Collected json files.")
-        return folder_list[:40]
+        return folder_list
     def refresh_directories(self):
         """
         A function to refresh the analysis folders. This function deletes the analysis folders except "report.json" file.
