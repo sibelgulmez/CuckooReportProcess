@@ -54,6 +54,7 @@ class dataset:
         for folder_name in folder_names:
             if folder_name.endswith(".json"):
                 folder_list.append(os.path.join(self.cuckoo_directory, folder_name))
+        print("Collected json files.")
         return folder_list
     def refresh_directories(self):
         """
@@ -62,7 +63,6 @@ class dataset:
         :return: The list of the report.json paths (after the move and rename operation)
         """
         json_paths = []
-        print("Refreshing folders...")
         for analysis_folder in self.analysis_folders:
             file_name = self.get_source_file_name(analysis_folder)
             report_json_path = self.get_report_json_path(analysis_folder)
@@ -72,7 +72,7 @@ class dataset:
                 self.delete_folder(analysis_folder)
             else:
                 print("Error occured with the analysis folder: ", analysis_folder)
-        print("Completed refreshing folders.")
+        print("Refreshed folders.")
         return json_paths
     def get_source_file_name (self, analysis_folder_path):
         """

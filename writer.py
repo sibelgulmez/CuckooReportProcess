@@ -122,6 +122,7 @@ class writer:
         self.signature_references = sorted(list(set(self.signature_references)))
         for signature_reference in self.signature_references:
             self.header.append("SIGNATURE_REFERENCE:" + signature_reference)
+        print("Filled header.")
     def fill_content(self):
         """
         A function to fill the csv content
@@ -227,6 +228,7 @@ class writer:
 
 
             self.content.append(ransomware_content)
+        print("Filled ransomware content.")
 
         # benign
         for json_path in self.benign_dataset.json_paths:
@@ -327,6 +329,7 @@ class writer:
                     benign_content.append(0)
 
             self.content.append(benign_content)
+        print("Filled benign content.")
     def write(self, directory, filename):
         """
         A function to write .csv and .txt files
