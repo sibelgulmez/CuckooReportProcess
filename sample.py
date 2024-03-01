@@ -256,7 +256,7 @@ class sample:
         try:
             for key in self.json_file_content["behavior"]["summary"].keys():
                 if key.startswith("file_"):
-                    operation_type = key.replace("file_").upper() + ":"
+                    operation_type = key.replace("file_", "").upper() + ":"
                     for processed_file in self.json_file_content["behavior"]["summary"][key]:
                         file = ("\\").join(processed_file.split("\\")[:-1])
                         files.append(operation_type + file)
@@ -274,7 +274,7 @@ class sample:
         try:
             for key in self.json_file_content["behavior"]["summary"].keys():
                 if key.startswith("file_"):
-                    operation_type = key.replace("file_").upper() + ":"
+                    operation_type = key.replace("file_", "").upper() + ":"
                     for processed_file in self.json_file_content["behavior"]["summary"][key]:
                         file_ext = processed_file.split("\\")[-1].split(".")[-1]
                         if (file_ext.isalnum()):

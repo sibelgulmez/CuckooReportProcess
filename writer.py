@@ -17,6 +17,7 @@ class writer:
 
         self.header = []
         self.content = []
+        self.info = []
 
         self.api_calls = []
         self.dlls = []
@@ -34,6 +35,7 @@ class writer:
 
         self.fill_header()
         self.fill_content()
+        self.generate_info()
     def fill_header(self):
         """
         A function to fill the header of the csv file and also the empty lists of the class
@@ -130,6 +132,7 @@ class writer:
         """
         # ransomware
         for json_path in self.ransomware_dataset.json_paths:
+            print(self.ransomware_dataset.json_paths.index(json_path), "ransomware")
             ransomware_content = [1] # the first column is 1 for ransomware samples (column of "class")
             ransomware_sample = sample(json_path)
 
@@ -232,6 +235,7 @@ class writer:
 
         # benign
         for json_path in self.benign_dataset.json_paths:
+            print(self.benign_dataset.json_paths.index(json_path), "benign")
             benign_content = [0] # the first column is 0 for benign samples (column of "class")
             benign_sample = sample(json_path)
 
@@ -330,6 +334,73 @@ class writer:
 
             self.content.append(benign_content)
         print("Filled benign content.")
+    def generate_info(self):
+        """
+        A function to generate an informatice csv file content, describing which feature set how many features.
+        :return:
+        """
+
+        self.info.append(["API CALLS",str(len(self.api_calls))])
+        self.info.append(["DLLS",str(len(self.dlls))])
+        self.info.append(["DROPS",str(len(self.drops))])
+        self.info.append(["DROP_EXTS",str(len(self.drop_exts))])
+        self.info.append(["DROP_TYPES",str(len(self.drop_types))])
+
+
+        regs_ = dict()
+        for reg in self.regs:
+            if reg.split(":")[0] not in regs_.keys():
+                regs_[reg.split(":")[0]] = 1
+            else:
+                regs_[reg.split(":")[0]] += 1
+        for key in regs_.keys():
+            self.info.append(["REG:" + key, str(regs_[key])])
+        self.info.append(["REG:TOTAL", str(len(self.regs))])
+
+
+
+
+        files_ = dict()
+        for file in self.files:
+            if file.split(":")[0] not in files_.keys():
+                files_[file.split(":")[0]] = 1
+            else:
+                files_[file.split(":")[0]] += 1
+        for key in files_.keys():
+            self.info.append(["FILE:" + key, str(files_[key])])
+        self.info.append(["FILE:TOTAL", str(len(self.files))])
+
+
+        file_ext_ = dict()
+        for file_ext in self.file_exts:
+            if file_ext.split(":")[0] not in file_ext_.keys():
+                file_ext_[file_ext.split(":")[0]] = 1
+            else:
+                file_ext_[file_ext.split(":")[0]] += 1
+        for key in file_ext_.keys():
+            self.info.append(["FILE_EXT:" + key, str(file_ext_[key])])
+        self.info.append(["FILE_EXT:TOTAL", str(len(self.file_exts))])
+
+        dir_ = dict()
+        for dir in self.dirs:
+            if dir.split(":")[0] not in dir_.keys():
+                dir_[dir.split(":")[0]] = 1
+            else:
+                dir_[dir.split(":")[0]] += 1
+        for key in dir_.keys():
+            self.info.append(["DIR:" + key, str(dir_[key])])
+        self.info.append(["DIR:TOTAL", str(len(self.dirs))])
+
+        self.info.append(["STRINGS",str(len(self.strings))])
+        self.info.append(["MUTEX",str(len(self.mutexes))])
+        self.info.append(["SIGNATURE",str(len(self.signatures))])
+        self.info.append(["SIGNATURE_REFERENCE",str(len(self.signature_references))])
+
+        self.info.append(["-----------------------------------------", "---------"])
+        total = len(self.api_calls) + len(self.dlls) + len(self.drops) + len(self.drop_exts) + len(self.drop_types) + len(self.regs) + len(self.files) + len(self.file_exts) + len(self.dirs) + len(self.strings) + len(self.mutexes) + len(self.signatures) + len(self.signature_references)
+        self.info.append(["TOTAL", str(total)])
+
+        print("Generated info.")
     def write(self, directory, filename):
         """
         A function to write .csv and .txt files
@@ -357,4 +428,14 @@ class writer:
             print(filename, "has been written successfully.")
         except Exception:
             print("Error occured while writing text file.")
+
+
+        filename = filename.replace("_variables.txt", "_variable_info.csv")
+        try:
+            with open(filename, 'w', newline='') as f:
+                csv_writer = csv.writer(f)
+                csv_writer.writerows(self.info)
+            print(filename, "has been written successfully.")
+        except Exception:
+            print("Error occured while writing info csv file.")
 

@@ -55,7 +55,7 @@ class dataset:
             if folder_name.endswith(".json"):
                 folder_list.append(os.path.join(self.cuckoo_directory, folder_name))
         print("Collected json files.")
-        return folder_list
+        return folder_list[:40]
     def refresh_directories(self):
         """
         A function to refresh the analysis folders. This function deletes the analysis folders except "report.json" file.
@@ -408,8 +408,9 @@ class dataset:
         try:
             for key in json_file_content["behavior"]["summary"].keys():
                 if key.startswith("file_"):
-                    operation_type = key.replace("file_").upper() + ":"
+                    operation_type = key.replace("file_", "").upper() + ":"
                     for processed_file in json_file_content["behavior"]["summary"][key]:
+                        print(processed_file, "processed_file\n\n")
                         file = ("\\").join(processed_file.split("\\")[:-1])
                         files.append(operation_type + file)
         except Exception:
@@ -426,7 +427,7 @@ class dataset:
         try:
             for key in json_file_content["behavior"]["summary"].keys():
                 if key.startswith("file_"):
-                    operation_type = key.replace("file_").upper() + ":"
+                    operation_type = key.replace("file_", "").upper() + ":"
                     for processed_file in json_file_content["behavior"]["summary"][key]:
                         file_ext = processed_file.split("\\")[-1].split(".")[-1]
                         if (file_ext.isalnum()):
