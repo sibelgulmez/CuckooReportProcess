@@ -131,8 +131,11 @@ class writer:
         :return:
         """
         # ransomware
+        counter = 1
+        length = len(self.ransomware_dataset.json_paths)
         for json_path in self.ransomware_dataset.json_paths:
-            print(self.ransomware_dataset.json_paths.index(json_path), "ransomware")
+            print("Processing ransomware files to generate csv content... ", counter, "/", length)
+            counter +=1
             ransomware_content = [1] # the first column is 1 for ransomware samples (column of "class")
             ransomware_sample = sample(json_path)
 
@@ -234,8 +237,11 @@ class writer:
         print("Filled ransomware content.")
 
         # benign
+        counter = 1
+        length = len(self.benign_dataset.json_paths)
         for json_path in self.benign_dataset.json_paths:
-            print(self.benign_dataset.json_paths.index(json_path), "benign")
+            print("Processing ransomware files to generate csv content... ", counter, "/", length)
+            counter +=1
             benign_content = [0] # the first column is 0 for benign samples (column of "class")
             benign_sample = sample(json_path)
 

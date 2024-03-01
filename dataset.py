@@ -410,7 +410,6 @@ class dataset:
                 if key.startswith("file_"):
                     operation_type = key.replace("file_", "").upper() + ":"
                     for processed_file in json_file_content["behavior"]["summary"][key]:
-                        print(processed_file, "processed_file\n\n")
                         file = ("\\").join(processed_file.split("\\")[:-1])
                         files.append(operation_type + file)
         except Exception:
