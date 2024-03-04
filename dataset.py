@@ -55,12 +55,12 @@ class dataset:
         A function to list all of the .json files in the specified directory
         :return: List all .json files in the specified directory
         """
+        print("Collecting json files.")
         folder_list = []
         folder_names = os.listdir(self.cuckoo_directory)
         for folder_name in folder_names:
             if folder_name.endswith(".json"):
                 folder_list.append(os.path.join(self.cuckoo_directory, folder_name))
-        print("Collected json files.")
         if self.sample_count == 0:
             return folder_list
         return folder_list[:self.sample_count]
