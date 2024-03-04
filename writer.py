@@ -416,7 +416,7 @@ class writer:
         total = len(self.api_calls) + len(self.dlls) + len(self.drops) + len(self.drop_exts) + len(self.drop_types) + len(self.regs) + len(self.files) + len(self.file_exts) + len(self.dirs) + len(self.strings) + len(self.mutexes) + len(self.signatures) + len(self.signature_references)
         self.info.append(["TOTAL", str(total)])
 
-        print("Generated info.")
+        print("Generated feature set information.")
     def write(self, directory, filename):
         """
         A function to write .csv and .txt files

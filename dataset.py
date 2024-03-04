@@ -147,6 +147,8 @@ class dataset:
         :param _list: source list
         :return: updated dictionary
         """
+        # deleting reoccurances
+        _list = list(set(list))
         for item in _list:
             if item not in _dict.keys():
                 _dict[item] = 1
