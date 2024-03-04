@@ -1,7 +1,5 @@
-import csv
-from dataset import dataset
+import csv, os
 from sample import sample
-import os, time
 
 class writer:
     """
