@@ -4,13 +4,17 @@ class dataset:
     """
     A class to proccess the whole dataset.
     """
-    def __init__(self, cuckoo_directory, get_json_paths_only = False):
+    def __init__(self, cuckoo_directory, get_json_paths_only = False, sample_count = 0, min_count = 5 ):
         """
         This class defines the list of report.json files' paths. To do that, the cuckoo analysis folders are getting "refreshed" first. Refreshing a cucckoo analysis folder deletesed itself except the report.json file. Only that file is kept and it is also renamed with the source executable file's name
         :param cuckoo_directory: The directory of cuckoo analysis folder which includes a number of analysis folders.
         :param get_json_paths_only: If True, this means that the folders are already refreshed and report.json files are moved. In that case, it is enough to return the list of these report.json files.
+        :param sample_count: Number of files to fetch. If 0, all of the files are fetched, Default = 0
+        :param min_count: minimum number of features to be appeared, so that they are saved in the 'unique' element lists. Default = 5
         """
         self.cuckoo_directory = cuckoo_directory
+        self.sample_count = sample_count
+        self.min_count = min_count
         self.analysis_folders = self.get_analysis_folders()
 
         if get_json_paths_only:
@@ -43,7 +47,9 @@ class dataset:
         folder_names = os.listdir(self.cuckoo_directory)
         for folder_name in folder_names:
             folder_list.append(os.path.join(self.cuckoo_directory, folder_name))
-        return folder_list
+        if self.sample_count == 0:
+            return folder_list
+        return folder_list[:self.sample_count]
     def get_json_paths(self):
         """
         A function to list all of the .json files in the specified directory
@@ -55,7 +61,9 @@ class dataset:
             if folder_name.endswith(".json"):
                 folder_list.append(os.path.join(self.cuckoo_directory, folder_name))
         print("Collected json files.")
-        return folder_list
+        if self.sample_count == 0:
+            return folder_list
+        return folder_list[:self.sample_count]
     def refresh_directories(self):
         """
         A function to refresh the analysis folders. This function deletes the analysis folders except "report.json" file.
@@ -132,8 +140,49 @@ class dataset:
         """
         shutil.rmtree(analysis_folder_path)
         return
+    def dict_filler(self, _dict, _list):
+        """
+        A function to fill a dictionary with a list. Dictionary's value is the number of occurances of that key.
+        :param _dict: dictionary to be filled
+        :param _list: source list
+        :return: updated dictionary
+        """
+        for item in _list:
+            if item not in _dict.keys():
+                _dict[item] = 1
+            else:
+                _dict[item] += 1
+        return _dict
+    def dict_to_list(self, _dict):
+        """
+        A function to create a list from a dictionary by using the self.min_count. If a key's value is larger than or equal to min_count, then it should be in the list.
+        :param _dict: source dictionary
+        :return: list of some of the keys of the source dictionary
+        """
+        _list = []
+        for key in _dict.keys():
+            if _dict[key] >= self.min_count:
+                _list.append(key)
+        return _list
     def create_unique_lists(self):
         print("Generating feature sets...")
+
+        # defining empty dictionaries
+        unique_api_calls_dict = dict()
+        unique_dlls_dict = dict()
+        unique_dirs_dict = dict()
+        unique_mutexes_dict = dict()
+        unique_strings_dict = dict()
+        unique_drops_dict = dict()
+        unique_drop_exts_dict = dict()
+        unique_regs_dict = dict()
+        unique_files_dict = dict()
+        unique_file_exts_dict = dict()
+        unique_signatures_dict = dict()
+        unique_signature_references_dict = dict()
+        unique_drop_types_dict = dict()
+
+        # filling dictionaries by using all of the files
         for report_json_path in self.json_paths:
             try:
                 # read file
@@ -142,72 +191,77 @@ class dataset:
 
                 # api calls
                 api_calls = self.get_api_calls(json_file_content)
-                self.unique_api_calls += api_calls
-                self.unique_api_calls = list(set(self.unique_api_calls))
+                unique_api_calls_dict = self.dict_filler(unique_api_calls_dict, api_calls)
 
                 # dlls
                 dlls = self.get_dlls(json_file_content)
-                self.unique_dlls += dlls
-                self.unique_dlls = list(set(self.unique_dlls))
+                unique_dlls_dict = self.dict_filler(unique_dlls_dict, dlls)
 
                 # enumdirs
                 dirs = self.get_dirs(json_file_content)
-                self.unique_dirs += dirs
-                self.unique_dirs = list(set(self.unique_dirs))
+                unique_dirs_dict = self.dict_filler(unique_dirs_dict, dirs)
 
                 # mutexes
                 mutexes = self.get_mutexes(json_file_content)
-                self.unique_mutexes += mutexes
-                self.unique_mutexes = list(set(self.unique_mutexes))
+                unique_mutexes_dict = self.dict_filler(unique_mutexes_dict, mutexes)
 
                 # strings
                 strings = self.get_strings(json_file_content)
-                self.unique_strings += strings
-                self.unique_strings = list(set(self.unique_strings))
+                unique_strings_dict = self.dict_filler(unique_strings_dict, strings)
 
                 # drops
                 drops = self.get_drops(json_file_content)
-                self.unique_drops+= drops
-                self.unique_drops = list(set(self.unique_drops))
+                unique_drops_dict = self.dict_filler(unique_drops_dict, drops)
 
                 # drop_exts
                 drop_exts = self.get_drop_exts(json_file_content)
-                self.unique_drop_exts+= drop_exts
-                self.unique_drop_exts = list(set(self.unique_drop_exts))
+                unique_drop_exts_dict = self.dict_filler(unique_drop_exts_dict, drop_exts)
 
                 # drop_types
                 drop_types = self.get_drop_types(json_file_content)
-                self.unique_drop_types += drop_types
-                self.unique_drop_types = list(set(self.unique_drop_exts))
+                unique_drop_types_dict = self.dict_filler(unique_drop_types_dict, drop_types)
 
                 # regs
                 regs = self.get_regs(json_file_content)
-                self.unique_regs += regs
-                self.unique_regs = list(set(self.unique_regs))
+                unique_regs_dict = self.dict_filler(unique_regs_dict, regs)
 
                 # files
                 files = self.get_files(json_file_content)
-                self.unique_files += files
-                self.unique_files = list(set(self.unique_files))
+                unique_files_dict = self.dict_filler(unique_files_dict, files)
 
                 # files_ext
-                files_ext = self.get_files_ext(json_file_content)
-                self.unique_file_exts += files_ext
-                self.unique_file_exts = list(set(self.unique_file_exts))
+                file_exts = self.get_files_ext(json_file_content)
+                unique_file_exts_dict = self.dict_filler(unique_file_exts_dict, file_exts)
 
                 # signatures
                 signatures = self.get_signatures(json_file_content)
-                self.unique_signatures += signatures
-                self.unique_signatures = list(set(self.unique_signatures))
+                unique_signatures_dict = self.dict_filler(unique_signatures_dict, signatures)
 
                 # signature_references
                 signature_references = self.get_signature_references(json_file_content)
-                self.unique_signature_references += signature_references
-                self.unique_signature_references = list(set(self.unique_signature_references))
+                unique_signature_references_dict = self.dict_filler(unique_signature_references_dict, signature_references)
 
             except Exception:
                 e = Exception
+
+        # filling lists, by using dictionaries
+        self.unique_api_calls = self.dict_to_list(unique_api_calls_dict)
+        self.unique_dlls = self.dict_to_list(unique_dlls_dict)
+        self.unique_dirs = self.dict_to_list(unique_dirs_dict)
+        self.unique_mutexes = self.dict_to_list(unique_mutexes_dict)
+        self.unique_strings = self.dict_to_list(unique_strings_dict)
+        self.unique_drops = self.dict_to_list(unique_drops_dict)
+        self.unique_drop_exts = self.dict_to_list(unique_drop_exts_dict)
+        self.unique_regs = self.dict_to_list(unique_regs_dict)
+        self.unique_files = self.dict_to_list(unique_files_dict)
+        self.unique_file_exts = self.dict_to_list(unique_file_exts_dict)
+        self.unique_signatures = self.dict_to_list(unique_signatures_dict)
+        self.unique_signature_references = self.dict_to_list(unique_signature_references_dict)
+        self.unique_drop_types = self.dict_to_list(unique_drop_types_dict)
+
+        # sorting lists
         self.sort_lists()
+
         return
     def get_api_calls(self, json_file_content):
         """

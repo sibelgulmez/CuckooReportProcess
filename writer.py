@@ -34,7 +34,7 @@ class writer:
         self.signature_references = []
 
         self.fill_header()
-        self.fill_content()
+        # self.fill_content()
         self.generate_info()
     def fill_header(self):
         """
@@ -124,222 +124,232 @@ class writer:
         self.signature_references = sorted(list(set(self.signature_references)))
         for signature_reference in self.signature_references:
             self.header.append("SIGNATURE_REFERENCE:" + signature_reference)
-        print("Filled header.")
-    def fill_content(self):
+        print("Filled header. Length of the header:", len(self.header))
+    def fill_content(self, directory, filename):
         """
         A function to fill the csv content
         :return:
         """
-        # ransomware
-        counter = 1
-        length = len(self.ransomware_dataset.json_paths)
-        for json_path in self.ransomware_dataset.json_paths:
-            print("Processing ransomware files to generate csv content... ", counter, "/", length)
-            counter +=1
-            ransomware_content = [1] # the first column is 1 for ransomware samples (column of "class")
-            ransomware_sample = sample(json_path)
 
-            # api call
-            for api_call in self.api_calls:
-                if api_call in ransomware_sample.api_calls:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+        filename = os.path.join(directory, filename + ".csv")
+        try:
+            with open(filename, 'w', newline='') as f:
+                csv_writer = csv.writer(f)
+                # csv_writer.writerow(self.header)
 
-            # dll
-            for dll in self.dlls:
-                if dll in ransomware_sample.dlls:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                # ransomware
+                counter = 1
+                length = len(self.ransomware_dataset.json_paths)
+                for json_path in self.ransomware_dataset.json_paths:
+                    print("Processing ransomware files to generate csv content... ", counter, "/", length)
+                    counter += 1
+                    ransomware_content = [1]  # the first column is 1 for ransomware samples (column of "class")
+                    ransomware_sample = sample(json_path)
 
-            # drop
-            for drop in self.drops:
-                if drop in ransomware_sample.drops:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # api call
+                    for api_call in self.api_calls:
+                        if api_call in ransomware_sample.api_calls:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # drop_ext
-            for drop_ext in self.drop_exts:
-                if drop_ext in ransomware_sample.drop_exts:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # dll
+                    for dll in self.dlls:
+                        if dll in ransomware_sample.dlls:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # drop_type
-            for drop_type in self.drop_types:
-                if drop_type in ransomware_sample.drop_types:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # drop
+                    for drop in self.drops:
+                        if drop in ransomware_sample.drops:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # reg
-            for reg in self.regs:
-                if reg in ransomware_sample.regs:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # drop_ext
+                    for drop_ext in self.drop_exts:
+                        if drop_ext in ransomware_sample.drop_exts:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # file
-            for file in self.files:
-                if file in ransomware_sample.files:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # drop_type
+                    for drop_type in self.drop_types:
+                        if drop_type in ransomware_sample.drop_types:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # file_ext
-            for file_ext in self.file_exts:
-                if file_ext in ransomware_sample.file_exts:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # reg
+                    for reg in self.regs:
+                        if reg in ransomware_sample.regs:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # dir
-            for dir in self.dirs:
-                if dir in ransomware_sample.dirs:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # file
+                    for file in self.files:
+                        if file in ransomware_sample.files:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # string
-            for string in self.strings:
-                if string in ransomware_sample.strings:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # file_ext
+                    for file_ext in self.file_exts:
+                        if file_ext in ransomware_sample.file_exts:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # mutex
-            for mutex in self.mutexes:
-                if mutex in ransomware_sample.mutexes:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # dir
+                    for dir in self.dirs:
+                        if dir in ransomware_sample.dirs:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
+                    # string
+                    for string in self.strings:
+                        if string in ransomware_sample.strings:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # signature
-            for signature in self.signatures:
-                if signature in ransomware_sample.signatures:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # mutex
+                    for mutex in self.mutexes:
+                        if mutex in ransomware_sample.mutexes:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
+                    # signature
+                    for signature in self.signatures:
+                        if signature in ransomware_sample.signatures:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
-            # signature reference
-            for signature_reference in self.signature_references:
-                if signature_reference in ransomware_sample.signature_references:
-                    ransomware_content.append(1)
-                else:
-                    ransomware_content.append(0)
+                    # signature reference
+                    for signature_reference in self.signature_references:
+                        if signature_reference in ransomware_sample.signature_references:
+                            ransomware_content.append(1)
+                        else:
+                            ransomware_content.append(0)
 
+                    # self.content.append(ransomware_content)
+                    csv_writer.writerow(ransomware_content)
 
-            self.content.append(ransomware_content)
-        print("Filled ransomware content.")
+                print("Filled ransomware content.")
 
-        # benign
-        counter = 1
-        length = len(self.benign_dataset.json_paths)
-        for json_path in self.benign_dataset.json_paths:
-            print("Processing ransomware files to generate csv content... ", counter, "/", length)
-            counter +=1
-            benign_content = [0] # the first column is 0 for benign samples (column of "class")
-            benign_sample = sample(json_path)
+                # benign
+                counter = 1
+                length = len(self.benign_dataset.json_paths)
+                for json_path in self.benign_dataset.json_paths:
+                    print("Processing ransomware files to generate csv content... ", counter, "/", length)
+                    counter += 1
+                    benign_content = [0]  # the first column is 0 for benign samples (column of "class")
+                    benign_sample = sample(json_path)
 
-            # api call
-            for api_call in self.api_calls:
-                if api_call in benign_sample.api_calls:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # api call
+                    for api_call in self.api_calls:
+                        if api_call in benign_sample.api_calls:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # dll
-            for dll in self.dlls:
-                if dll in benign_sample.dlls:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # dll
+                    for dll in self.dlls:
+                        if dll in benign_sample.dlls:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # drop
-            for drop in self.drops:
-                if drop in benign_sample.drops:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # drop
+                    for drop in self.drops:
+                        if drop in benign_sample.drops:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # drop_ext
-            for drop_ext in self.drop_exts:
-                if drop_ext in benign_sample.drop_exts:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # drop_ext
+                    for drop_ext in self.drop_exts:
+                        if drop_ext in benign_sample.drop_exts:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # drop_type
-            for drop_type in self.drop_types:
-                if drop_type in benign_sample.drop_types:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # drop_type
+                    for drop_type in self.drop_types:
+                        if drop_type in benign_sample.drop_types:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # reg
-            for reg in self.regs:
-                if reg in benign_sample.regs:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # reg
+                    for reg in self.regs:
+                        if reg in benign_sample.regs:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # file
-            for file in self.files:
-                if file in benign_sample.files:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # file
+                    for file in self.files:
+                        if file in benign_sample.files:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # file_ext
-            for file_ext in self.file_exts:
-                if file_ext in benign_sample.file_exts:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # file_ext
+                    for file_ext in self.file_exts:
+                        if file_ext in benign_sample.file_exts:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # dir
-            for dir in self.dirs:
-                if dir in benign_sample.dirs:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # dir
+                    for dir in self.dirs:
+                        if dir in benign_sample.dirs:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # string
-            for string in self.strings:
-                if string in benign_sample.strings:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # string
+                    for string in self.strings:
+                        if string in benign_sample.strings:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # mutex
-            for mutex in self.mutexes:
-                if mutex in benign_sample.mutexes:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # mutex
+                    for mutex in self.mutexes:
+                        if mutex in benign_sample.mutexes:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
+                    # signature
+                    for signature in self.signatures:
+                        if signature in benign_sample.signatures:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
-            # signature
-            for signature in self.signatures:
-                if signature in benign_sample.signatures:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+                    # signature reference
+                    for signature_reference in self.signature_references:
+                        if signature_reference in benign_sample.signature_references:
+                            benign_content.append(1)
+                        else:
+                            benign_content.append(0)
 
+                    # self.content.append(benign_content)
+                    csv_writer.writerow(benign_content)
+                print("Filled benign content.")
 
-            # signature reference
-            for signature_reference in self.signature_references:
-                if signature_reference in benign_sample.signature_references:
-                    benign_content.append(1)
-                else:
-                    benign_content.append(0)
+            print(filename, "has been written successfully.")
+        except Exception:
+            print("Error occured while writing csv file.")
 
-            self.content.append(benign_content)
-        print("Filled benign content.")
     def generate_info(self):
         """
         A function to generate an informatice csv file content, describing which feature set how many features.
@@ -415,16 +425,16 @@ class writer:
         :return:
         """
         # csv file
+        # try:
+        #     with open(filename, 'w', newline='') as f:
+        #         csv_writer = csv.writer(f)
+        #         csv_writer.writerow(self.header)
+        #         csv_writer.writerows(self.content)
+        #     print(filename, "has been written successfully.")
+        # except Exception:
+        #     print("Error occured while writing csv file.")
+        self.fill_content(directory, filename)
         filename = os.path.join(directory, filename + ".csv")
-        try:
-            with open(filename, 'w', newline='') as f:
-                csv_writer = csv.writer(f)
-                csv_writer.writerow(self.header)
-                csv_writer.writerows(self.content)
-            print(filename, "has been written successfully.")
-        except Exception:
-            print("Error occured while writing csv file.")
-
 
         filename = filename.replace(".csv", "_variables.txt")
         try:
