@@ -69,7 +69,6 @@ class writer:
         for drop_ext in self.drop_exts:
             self.header.append("DROP_EXT:" + drop_ext)
 
-
         # drop types
         self.drop_types = self.ransomware_dataset.unique_drop_types + self.benign_dataset.unique_drop_types
         self.drop_types = sorted(list(set(self.drop_types)))
@@ -81,7 +80,6 @@ class writer:
         self.regs = sorted(list(set(self.regs)))
         for reg in self.regs:
             self.header.append("REG:" + reg)
-
 
         # files
         self.files = self.ransomware_dataset.unique_files + self.benign_dataset.unique_files
@@ -124,6 +122,7 @@ class writer:
         self.signature_references = sorted(list(set(self.signature_references)))
         for signature_reference in self.signature_references:
             self.header.append("SIGNATURE_REFERENCE:" + signature_reference)
+
         print("Filled header. Length of the header:", len(self.header))
     def fill_content(self, directory, filename):
         """
